@@ -6,16 +6,19 @@ from send_slack_msg import send_slack_notification
 import sys
 import json
 from random import choice
-from tqdm import tqdm
+from tqdm import tqdmls 
 from argparse import ArgumentParser, FileType
 from configparser import ConfigParser
 from confluent_kafka import Producer
+from utilities import get_date_str
 
 
 TRIMET_DATA_URL = "http://www.psudataeng.com:8000/getBreadCrumbData"
 DATASTORE_PATH = "/home/dtm-project/data-archive/"
 
 if __name__ == '__main__':
+
+    send_slack_notification("gather_produce.py was run")
     # Parse the command line.
     parser = ArgumentParser()
     parser.add_argument('config_file', type=FileType('r'))
@@ -40,8 +43,6 @@ if __name__ == '__main__':
 
 
     def save_to_json(data_as_dict):
-        def get_date_str():
-            return datetime.now(tz=pytz.utc).astimezone(pytz.timezone("US/Pacific")).strftime("%Y-%m-%d")
         filename = f"{DATASTORE_PATH}{get_date_str()}.json"
         print(filename)
         data = json.dumps(data_as_dict, indent=4)
@@ -90,11 +91,7 @@ if __name__ == '__main__':
         print("Fetching data...")
         data = fetch_data()
         if(data):
-            print("Saving data to json")
-            save_to_json(data)
+            #print("Saving data to json")
+            #save_to_json(data)
+            print("Producing data...")
             produce_data(data)
-
-
-
-
-

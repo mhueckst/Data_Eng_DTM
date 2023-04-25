@@ -1,23 +1,13 @@
-
-# import time
-# from datetime import datetime
-
-path = "/home/dtm-project/consumer_dump.txt"
-# while True:
-#     with open(path, "a") as f:
-#         f.write("The current timestamp is: " + str(datetime.now()) + "\n")
-#         f.close()
-#     time.sleep(10)
-
+#path = "/home/dtm-project/consumer_records.txt"
 
 import sys
 from configparser import ConfigParser
 from confluent_kafka import Consumer, OFFSET_BEGINNING
 from argparse import ArgumentParser, FileType
-# import getting_started
+from utilities import get_date_str
 
-# if __name__ == '__main__':
-# while True:  
+path = f"/home/dtm-project/consumed_data/{get_date_str()}.txt"
+
 # Parse the command line.
 parser = ArgumentParser()
 # parser.add_argument('config_file', type=FileType('r'))
@@ -50,7 +40,7 @@ consumer.subscribe([topic], on_assign=reset_offset)
 
 # Open the output file for writing.
 # with open(args.output_file, 'w') as output_file:
-with open(path, 'w') as output_file:
+with open(path, 'a') as output_file:
 
     # Poll for new messages from Kafka and write them to the file.
     try:
@@ -68,7 +58,8 @@ with open(path, 'w') as output_file:
                 topic=msg.topic(), key=key if key is not None else 'None', value=value if value is not None else 'None'))
 
                 output_file.write(f"{value}\n")
-    except KeyboardInterrupt:
+    except:
+        print("\nConsumer stopped.")
         output_file.close() 
         pass
     finally:
