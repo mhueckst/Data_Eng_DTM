@@ -84,7 +84,7 @@ if __name__ == '__main__':
             # print("Data:", data)
             producer.produce(topic, value=data, callback=delivery_callback)
         producer.flush()
-        #send_slack_notification("Data was produced to the Kafka topic.")
+        send_slack_notification("Data was produced to the Kafka topic.")
 
 
     # Produce data by selecting random values from these lists.
