@@ -6,7 +6,7 @@ from send_slack_msg import send_slack_notification
 import sys
 import json
 from random import choice
-from tqdm import tqdmls 
+from tqdm import tqdm
 from argparse import ArgumentParser, FileType
 from configparser import ConfigParser
 from confluent_kafka import Producer
@@ -18,7 +18,6 @@ DATASTORE_PATH = "/home/dtm-project/data-archive/"
 
 if __name__ == '__main__':
 
-    send_slack_notification("gather_produce.py was run")
     # Parse the command line.
     parser = ArgumentParser()
     parser.add_argument('config_file', type=FileType('r'))
@@ -55,7 +54,6 @@ if __name__ == '__main__':
     def fetch_data():
         try: 
             data = requests.get(TRIMET_DATA_URL).text
-            data = json.loads(data)
             return data
         except:
             send_slack_notification("Today's data could not be fetched.")
@@ -63,12 +61,20 @@ if __name__ == '__main__':
 
     def parse_json(filename):
         with open(filename, "r") as read_file:
-            data = json.load(read_file)
+            data = read_file.read()
+        # If little data was given (likely an error message)
+        if(len(data) < 1000):
+            data = []
+        else:
+            data = json.loads(data)
         return data
 
     def produce_data(data_list):
         length = len(data_list)
-        print(length)
+        if(length == 0):
+            print("Data not available for this day")
+            send_slack_notification("There is no data to produce for this day")
+            return
         bar = tqdm(total=length)
         for i in range(length):
             if(i % 10000 == 0):
@@ -78,19 +84,24 @@ if __name__ == '__main__':
             # print("Data:", data)
             producer.produce(topic, value=data, callback=delivery_callback)
         producer.flush()
-        send_slack_notification("Data was produced to the Kafka topic.")
+        #send_slack_notification("Data was produced to the Kafka topic.")
 
 
     # Produce data by selecting random values from these lists.
     topic = "breadcrumbs_readings"
 
     if(args.data_filename):
+        print("Retrieving data from file...")
         data_parsed = parse_json(args.data_filename)
         produce_data(data_parsed)
     else:
         print("Fetching data...")
         data = fetch_data()
-        if(data):
+        # If little data was given (likely an error message)
+        if(len(data) < 1000):
+            data = []
+        elif(data):
+            data = json.loads(data)
             #print("Saving data to json")
             #save_to_json(data)
             print("Producing data...")
