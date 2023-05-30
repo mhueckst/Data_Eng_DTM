@@ -18,7 +18,6 @@ Datafile = "filedoesnotexist"  # name of the data file to be loaded
 Datafile = ""
 CreateDB = ""
 
-
 def initialize():
     global Datafile
     global CreateDB
@@ -41,57 +40,49 @@ def dbconnect():
     )
     return connection
 
+def validate_transform_trips(df):
+    print(df)
+    df = df.drop(["Unnamed: 0"], axis=1)
+    df = df.dropna()
+    df = df.drop_duplicates(subset="trip_id", keep="first")
+    print(df)
+    return df
 
 # create DF from csv, transform into sql ready dfs, load into postgres:
 def copy_from_stringio(conn):
-    csv = Datafile
-    # df = pd.read_csv(csv)
-    df = vt.transform_csv(csv)
-    breadcrumb = vt.transform_BreadCrumb(df)
-    trip = vt.transform_Trip(df)
-    res = vt.read_csv_and_validate_all(csv)
-    if not res:
-        return 0
-    trip, breadcrumb = res
-    print("Dataframes created")
+    # breadcrumb_csv = Datafile
+    stop_event_csv = Datafile
+
+    # Get dataframes as validated csvs: 
+    # df = vt.transform_csv(breadcrumb_csv)
+    df = pd.read_csv(stop_event_csv)
+    print(df)
+    stop_event = validate_transform_trips(df)
 
     # Load trip table using copy_from and stringIO buffer:
     buffer = io.StringIO()
-    trip.to_csv(buffer, index=False, header=False)
+    stop_event.to_csv(buffer, index=False, header=False)
     buffer.seek(0)
 
     cursor = conn.cursor()
     start = time.perf_counter()
 
-    cursor.copy_from(buffer, "trip", sep=",")
+    cursor.copy_from(buffer, "stopevent", sep=",")
 
     elapsed = time.perf_counter() - start
     print(f"Finished Loading. Elapsed Time: {elapsed:0.4} seconds")
 
-    # Load breadcrumb table using copy_from and stringIO buffer:
-    buffer = io.StringIO()
-    breadcrumb.to_csv(buffer, index=False, header=False)
-    buffer.seek(0)
-
-    cursor = conn.cursor()
-    start = time.perf_counter()
-
-    cursor.copy_from(buffer, "breadcrumb", sep=",")
-
-    elapsed = time.perf_counter() - start
-    print(f"Finished Loading. Elapsed Time: {elapsed:0.4} seconds")
-
-    return len(breadcrumb) + len(trip)
+    return len(stop_event)
 
 
 # If called from main, simply use the cmd argument.
 # If called from another script, have the cmd provide a filename as the argument.
-def main(filename=None, ):
+def main(file=None):
     global Datafile
 
     try:
-        if filename:
-            Datafile = filename
+        if file:
+            Datafile = file
         else:
             initialize()
 
@@ -101,20 +92,20 @@ def main(filename=None, ):
             raise Exception
         conn.commit()
         # If this function was called from outside (automated, send slack notif)
-        if filename:
+        if file:
             send_slack_notification(
-                f"Today's data was loaded to the database. Rows added: {rows_added_to_db}."
+                f"Today's stop-event data was loaded to the database. Rows added: {rows_added_to_db}."
             )
         else:
             print(
-                f"Today's data was loaded to the database. Rows added: {rows_added_to_db}."
+                f"Today's stop-event data was loaded to the database. Rows added: {rows_added_to_db}."
             )
         print(f"Rows added: {rows_added_to_db}")
     except Exception as e:
         # If this function was called from outside (automated, send slack notif)
-        if filename:
-            send_slack_notification("Could not upload today's data to the database.")
-        print("Could not upload today's data to the database.")
+        if file:
+            send_slack_notification("Could not upload today's stop-event data to the database.")
+        print("Could not upload today's stop-event data to the database.")
         print(e)
         traceback.print_exc()
 

@@ -1,0 +1,9 @@
+.env
+__pycache__/
+data-archive/
+consumer_dump.txt
+new_output.txt
+output.txt
+deleted_files
+*.txt
+*.csv
