@@ -1,0 +1,11 @@
+{
+    "python.pythonPath": "~/anaconda3/bin/python",
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
+    "python.formatting.autopep8Path": "~/anaconda3/bin/autopep8",
+    "python.formatting.blackPath": "~/anaconda3/bin/black",
+    "python.formatting.yapfPath": "~/anaconda3/bin/yapf",
+    "python.linting.flake8Path": "~/anaconda3/bin/flake8",
+    "python.testing.pytestPath": "~/anaconda3/bin/pytest"
+}
+
