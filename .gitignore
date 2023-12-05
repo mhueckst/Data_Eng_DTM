@@ -6,4 +6,5 @@ new_output.txt
 output.txt
 deleted_files
 *.txt
+!requirements.txt
 *.csv
