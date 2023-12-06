@@ -24,11 +24,10 @@ def initialize():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--datafile", required=True)
-    # parser.add_argument("-c", "--createtable", action="store_true")
     args = parser.parse_args()
     Datafile = args.datafile
 
-    # CreateDB = args.createtable
+    
 
 
 def dbconnect():
@@ -50,11 +49,10 @@ def validate_transform_trips(df):
 
 # create DF from csv, transform into sql ready dfs, load into postgres:
 def copy_from_stringio(conn):
-    # breadcrumb_csv = Datafile
+    
     stop_event_csv = Datafile
 
     # Get dataframes as validated csvs: 
-    # df = vt.transform_csv(breadcrumb_csv)
     df = pd.read_csv(stop_event_csv)
     print(df)
     stop_event = validate_transform_trips(df)

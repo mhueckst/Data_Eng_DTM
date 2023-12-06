@@ -2,6 +2,9 @@ import os
 from dotenv import load_dotenv
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
+
+#This module defines a function that connects to and creates a Slack Bot to post a message to a channel defned in the environment variables.
+
 load_dotenv()
 
 SLACK_BOT_OAUTH_TOKEN = os.getenv("SLACK_BOT_OAUTH_TOKEN")

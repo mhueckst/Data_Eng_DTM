@@ -82,7 +82,6 @@ if __name__ == '__main__':
                 producer.flush()
             bar.update(1)
             data = json.dumps(data_list[i])
-            # print("Data:", data)
             producer.produce(topic, value=data, callback=delivery_callback)
         producer.flush()
         send_slack_notification("Data was produced to the Kafka topic.")
@@ -103,7 +102,5 @@ if __name__ == '__main__':
             data = []
         elif(data):
             data = json.loads(data)
-            #print("Saving data to json")
-            #save_to_json(data)
             print("Producing data...")
             produce_data(data)

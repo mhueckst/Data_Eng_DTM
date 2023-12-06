@@ -18,18 +18,16 @@ Datafile = "filedoesnotexist"  # name of the data file to be loaded
 Datafile = ""
 CreateDB = ""
 
-
 def initialize():
     global Datafile
     global CreateDB
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--datafile", required=True)
-    # parser.add_argument("-c", "--createtable", action="store_true")
     args = parser.parse_args()
     Datafile = args.datafile
 
-    # CreateDB = args.createtable
+   
 
 
 def dbconnect():
@@ -45,7 +43,6 @@ def dbconnect():
 # create DF from csv, transform into sql ready dfs, load into postgres:
 def copy_from_stringio(conn):
     csv = Datafile
-    # df = pd.read_csv(csv)
     df = vt.transform_csv(csv)
     breadcrumb = vt.transform_BreadCrumb(df)
     trip = vt.transform_Trip(df)
