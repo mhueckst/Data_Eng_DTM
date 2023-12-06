@@ -296,6 +296,7 @@ Send2Trash @ file:///tmp/build/80754af9/send2trash_1632406701022/work
 service-identity @ file:///Users/ktietz/demo/mc3/conda-bld/service_identity_1629460757137/work
 sip @ file:///private/var/folders/sy/f16zz6x50xz3113nwtb9bvq00000gp/T/abs_88z1zrsfrf/croots/recipe/sip_1659012373083/work
 six @ file:///tmp/build/80754af9/six_1644875935023/work
+slack-sdk==3.26.1
 smart-open @ file:///private/var/folders/sy/f16zz6x50xz3113nwtb9bvq00000gp/T/abs_27148096-9ddc-448c-830e-fb4829d46f5dwl2am402/croots/recipe/smart_open_1651563554983/work
 sniffio @ file:///Users/builder/ci_310/sniffio_1642537651147/work
 snowballstemmer @ file:///tmp/build/80754af9/snowballstemmer_1637937080595/work
