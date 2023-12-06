@@ -8,17 +8,20 @@ It supports resetting the Kafka offset and specifies the output file path.
 import sys
 from configparser import ConfigParser
 from confluent_kafka import Consumer, KafkaError, OFFSET_BEGINNING
-from argparse import ArgumentParser
+from argparse import ArgumentParser, FileType
 from utilities import get_date_str
 from send_slack_msg import send_slack_notification
+import os
+from utilities import get_date_str
 
 def parse_arguments():
     """ Parses command-line arguments """
     parser = ArgumentParser()
-    parser.add_argument('--reset', action='store_true')
+    parser.add_argument('config_file', type=FileType('r'), help='Configuration file for the Kafka producer.')
+    parser.add_argument('--reset', action='store_true', help='Reset the Kafka offset if provided.')
     return parser.parse_args()
 
-def parse_config():
+def parse_config(config_file):
     """ Parses configuration from 'getting_started.ini' file """
     config_parser = ConfigParser()
     with open("./getting_started.ini", "r") as config_file:
@@ -60,9 +63,16 @@ def process_message(msg, output_file):
 
 if __name__ == "__main__":
     args = parse_arguments()
-    config = parse_config()
+    config = parse_config(args.config_file)  # Pass the config file from the arguments
     consumer = Consumer(config)
     consumer.subscribe(["breadcrumbs_readings"], on_assign=reset_offset)
-    output_file_path = f"/home/dtm-project/consumed_data/{get_date_str()}.txt"
+    output_file_path = f"/Users/mahshid/dtm-project/consumed_data/{get_date_str()}.txt"
+    
+    # Create the directory if it does not exist
+    directory = os.path.dirname(output_file_path)
+    if not os.path.exists(directory):
+       os.makedirs(directory)
+    
     consume_messages(consumer, output_file_path)
+
     
