@@ -1,122 +1,108 @@
-# path = "/home/dtm-project/consumer_records.txt"
+#!/usr/bin/env python
+"""
+This script consumes Kafka messages from the 'stop_data_readings' topic,
+converts them into CSV format, and writes to a file. It also handles
+resetting offsets and tracks any conversion failures.
+"""
 
 import sys
+import json
 from configparser import ConfigParser
 from confluent_kafka import Consumer, OFFSET_BEGINNING
-from argparse import ArgumentParser, FileType
+from argparse import ArgumentParser
 from utilities import get_date_str
-from send_slack_msg import send_slack_notification
-import json
+import os
+# from send_slack_msg import send_slack_notification
 
-path = f"/home/dtm-project/consumed_data/trips_{get_date_str()}.csv"
-PRINT_CONSUMED_RECORDS = False
-KEYS = [
-    "trip_id",
-    "route_number",
-    "service_key",
-    "direction"
-]
-LAST_KEY = KEYS[len(KEYS) - 1]
-CSV_LABELS = ""
-for key in KEYS:
-    CSV_LABELS += key
-    if key == LAST_KEY:
-        CSV_LABELS += "\n"
-    else:
-        CSV_LABELS += ","
+def parse_arguments():
+    """
+    Parses command-line arguments and returns the parsed arguments.
+    """
+    parser = ArgumentParser()
+    parser.add_argument('config_file', type=str, help='Configuration file for the Kafka consumer.')
+    parser.add_argument("--reset", action="store_true", help="Reset the Kafka offset if provided.")
+    return parser.parse_args()
 
-# Parse the command line.
-parser = ArgumentParser()
-# parser.add_argument('config_file', type=FileType('r'))
-parser.add_argument("--reset", action="store_true")
-# parser.add_argument('output_file', type=str, help='The file to save incoming records')
-args = parser.parse_args()
+def initialize_consumer(config_file_path):
+    """
+    Initializes and returns a Kafka Consumer with configuration from the given file.
+    """
+    config_parser = ConfigParser()
+    with open(config_file_path, "r") as config_file:
+        config_parser.read_file(config_file)
+        config = dict(config_parser["default"])
+        config.update(config_parser["consumer"])
+    return Consumer(config)
 
-# Parse the configuration.
-config_parser = ConfigParser()
-with open("./getting_started.ini", "r") as config_file:
-    # config_parser.read_file(args.config_file)
-    config_parser.read_file(config_file)
-    config = dict(config_parser["default"])
-    config.update(config_parser["consumer"])
-
-# Create Consumer instance
-consumer = Consumer(config)
-
-
-# Set up a callback to handle the '--reset' flag.
-def reset_offset(consumer, partitions):
-    if args.reset:
-        for p in partitions:
-            p.offset = OFFSET_BEGINNING
-        consumer.assign(partitions)
-
-
-# Convert one JSON to string format
-def json_to_csv(string):
-    obj = json.loads(string)
-    csv_string = ""
-
-    for key in KEYS:
-        value = ""
-        if key in obj:
-            value = str(obj[key])
-        csv_string += value
-        if key == LAST_KEY:
-            csv_string += "\n"
-        else:
-            csv_string += ","
-
-    return csv_string
-
-
-# Subscribe to topic
-topic = "stop_data_readings"
-consumer.subscribe([topic], on_assign=reset_offset)
-
-started_consuming = False
-number_of_fails = 0
-# Open the output file for writing.
-# with open(args.output_file, 'w') as output_file:
-with open(path, "w") as output_file:
-    # Poll for new messages from Kafka and write them to the file.
+def json_to_csv(json_string, keys):
+    """
+    Converts a JSON string to a CSV format string based on specified keys.
+    """
     try:
-        output_file.write(CSV_LABELS)
+        obj = json.loads(json_string)
+        return ",".join(str(obj.get(key, "")) for key in keys) + "\n"
+    except json.JSONDecodeError as e:
+        print(f"JSON decoding error: {e}")
+        return ""
+
+def consume_and_write_to_csv(consumer, output_path, topic, keys):
+    """
+    Consumes messages from Kafka and writes them to a CSV file.
+    """
+    with open(output_path, "w") as output_file:
+        output_file.write(",".join(keys) + "\n")
+        started_consuming = False
+        number_of_fails = 0
+
         while True:
             msg = consumer.poll(1.0)
             if msg is None:
                 print("Waiting...")
-                started_consuming = False
-            elif msg.error():
-                print("ERROR: %s".format(msg.error()))
-            else:
-                if started_consuming == False:
-                    started_consuming = True
-                    print("Stop event data is being consumed.")
-                    # send_slack_notification("Data is being consumed.")
+                continue
+            if msg.error():
+                print(f"ERROR: {msg.error()}")
+                continue
 
-                key = msg.key().decode("utf-8") if msg.key() is not None else None
-                value = msg.value().decode("utf-8") if msg.value() is not None else None
+            if not started_consuming:
+                started_consuming = True
+                print("Stop event data is being consumed.")
+                # send_slack_notification("Data is being consumed.")
 
-                if PRINT_CONSUMED_RECORDS:
-                    print(
-                        "Consumed event from topic {topic}: key = {key} value = {value}".format(
-                            topic=msg.topic(),
-                            key=key if key is not None else "None",
-                            value=value if value is not None else "None",
-                        )
-                    )
-                try:
-                    csv_string = json_to_csv(value)
-                except Exception as e:
-                    print(e)
-                    number_of_fails += 1
+            csv_string = json_to_csv(msg.value().decode("utf-8"), keys)
+            if csv_string:
                 output_file.write(csv_string)
-    except:
-        print("\nStop event consumer stopped.")
-        print(f"Number of fails: {number_of_fails}")
-        output_file.close()
-        pass
-    finally:
-        # Leave group and commit final offsets
-        consumer.close()
+            else:
+                number_of_fails += 1
+
+    print(f"\nStop event consumer stopped. Number of fails: {number_of_fails}")
+
+def reset_offset(consumer, partitions, reset):
+    """
+    Resets the offset for the consumer if the reset flag is set.
+    """
+    if reset:
+        for p in partitions:
+            p.offset = OFFSET_BEGINNING
+        consumer.assign(partitions)
+
+def main():
+    args = parse_arguments()
+
+    consumer = initialize_consumer(args.config_file)
+    topic = "stop_data_readings"
+    keys = ["trip_id", "route_number", "service_key", "direction"]
+
+    output_path = f"/Users/mahshid/dtm-project/consumed_data/trips_{get_date_str()}.csv"
+
+    # Create the directory if it does not exist
+    directory = os.path.dirname(output_path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    consumer.subscribe([topic], on_assign=lambda c, p: reset_offset(c, p, args.reset))
+    consume_and_write_to_csv(consumer, output_path, topic, keys)
+
+if __name__ == "__main__":
+    main()
+
+
