@@ -1,18 +1,92 @@
-# Data_Eng_DTM
+Data_Eng_DTM
 
-(This repository is a backup for the GCP VM we are using- this is why only Tim and Dan have contributed). 
+Project Overview
+Data_Eng_DTM is a team project developed for CS 510 Data Engineering, consisting of team members Dan, Tim, Mahshid, and Max (DTM). This project implements a data pipeline to visualize Portland, Oregon bus (TriMet) data utilizing Google Cloud Project, Apache Kafka, PostgreSQL, Linux utilities, and Mapbox.
 
-This is a team project for CS 510 Data Engineering consisting of Dan, Tim, Mahshid, and Max (DTM). 
+Key functionalities include:
+- Consuming API to fetch TriMet GPS breadcrumbs.
+- Producing and consuming data to/from a Kafka topic.
+- Automating data processing and notifications via a Slack bot.
+- Transforming data using Pandas and storing it in PostgreSQL.
+- Visualizing SQL queries of the data on Mapbox.
 
-We created a data pipeline to visalize Portland, Oregon bus (Trimet) data using Google Cloud Project, Apache Kafka, PostgreSQL, linux utilities, and Mapbox.  
+ Requirements
+- Python 3.10.9 (Conda base environment)
+- Additional Python libraries as listed in `requirements.txt`
 
-First, we consumed an API to fetch the Trimet GPS breadcrumbs. Then, we produced these to a Kafka topic, and subsequently consumed them. We automated this process, 
-and we created a Slack notification bot to alert us when the daily data had been produced and consumed from the Kafka topic. 
+Installation
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Mahshiiiiid/CRR_Final_Project.git
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd Data_Eng_DTM
+   ```
+3. Install required Python packages:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-We transformed the data into a more streamlined version using Pandas, then we added a PostgreSQL database to this pipeline, to store the data. This process was also automated. 
+Configuration
+- Configure the environment variables as needed in `.env` file.
+- Ensure proper setup for Apache Kafka and PostgreSQL.
 
-Finally, we used Mapbox to visualize SQL queries of the data, to answer questions like "What is the most northern bus route?", or "What is the longest duration bus route?". 
+Running the Application
+Execute the following scripts in order to set up and run the data pipeline:
 
-Here is an example from the visualization: This is all of the buses that passed through the SW 4th and Harrison bus stop in downtown Portland, Oregon, on Monday, 1/16/23, from 9-11am:
+1. Gather and Produce Data:
+   ```bash
+   python gather_produce.py
+   ```
 
-![data viz pic](https://github.com/mhueckst/Data_Eng_DTM/blob/master/data%20viz%20pic.png)
+2. Consume Data:**
+   - For initial consumption:
+     ```bash
+     python consumer.py
+     ```
+   - For updated consumption process:
+     ```bash
+     python new_consumer.py
+     ```
+
+3. Load Data to PostgreSQL:**
+   - For trips data:
+     ```bash
+     python load_to_postgres_trips.py
+     ```
+   - For general data loading:
+     ```bash
+     python load_to_postgres.py
+     ```
+
+4. Data Transformation and Validation:**
+   ```bash
+   python validate_transform.py
+   ```
+
+5. Initiating Database Load:**
+   ```bash
+   python initiate_db_load.py
+   ```
+
+6. Server and Visualization:**
+   - Start the server:
+     ```bash
+     python server.py
+     ```
+   - Access the visualization through `index.html`.
+
+Testing
+Run the following command to execute tests (if any):
+```bash
+python -m unittest
+```
+
+Contributing
+Contributions to the Data_Eng_DTM project are welcome. Please follow the standard fork and pull request workflow.
+
+Contact
+For any queries or contributions, please contact mghasemi@pdx.edu.
+
+
