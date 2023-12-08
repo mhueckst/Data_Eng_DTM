@@ -2,8 +2,6 @@
 This script consumes messages from a Kafka topic and writes them to a file.
 It supports resetting the Kafka offset and specifies the output file path.
 """
-# Alternative file path for storing consumer records (currently not in use)
-# path = "/home/dtm-project/consumer_records.txt"
 
 import sys
 from configparser import ConfigParser
@@ -66,7 +64,7 @@ if __name__ == "__main__":
     config = parse_config(args.config_file)  # Pass the config file from the arguments
     consumer = Consumer(config)
     consumer.subscribe(["breadcrumbs_readings"], on_assign=reset_offset)
-    output_file_path = f"/Users/mahshid/dtm-project/consumed_data/{get_date_str()}.txt"
+    output_file_path = f"/home/consumed_data/{get_date_str()}.txt"
     
     # Create the directory if it does not exist
     directory = os.path.dirname(output_file_path)

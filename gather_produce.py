@@ -15,7 +15,7 @@ from utilities import get_date_str
 from send_slack_msg import send_slack_notification
 
 TRIMET_DATA_URL = "http://www.psudataeng.com:8000/getBreadCrumbData"
-DATASTORE_PATH = "/home/dtm-project/data-archive/"
+DATASTORE_PATH = "/home/data-archive/"
 
 def parse_arguments():
     """

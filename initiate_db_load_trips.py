@@ -7,7 +7,7 @@ from utilities import get_date_str  # Importing 'get_date_str' function from the
 # Constructing the file path for the trips data file
 # This file path includes the date to ensure that the data corresponds to the current day
 # The 'get_date_str()' function from 'utilities' module returns a string representation of today's date
-filename = f"/home/dtm-project/consumed_data/trips_{get_date_str()}.csv"
+filename = f"/home/consumed_data/trips_{get_date_str()}.csv"
 
 # Calling the main function from the 'load_to_postgres_trips' module
 # The function is responsible for loading the data from the CSV file (specified by 'filename') into the PostgreSQL database

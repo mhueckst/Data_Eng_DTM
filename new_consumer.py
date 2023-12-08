@@ -92,7 +92,7 @@ def main():
     topic = "stop_data_readings"
     keys = ["trip_id", "route_number", "service_key", "direction"]
 
-    output_path = f"/Users/mahshid/dtm-project/consumed_data/trips_{get_date_str()}.csv"
+    output_path = f"/home/consumed_data/trips_{get_date_str()}.csv"
 
     # Create the directory if it does not exist
     directory = os.path.dirname(output_path)

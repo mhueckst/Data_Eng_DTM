@@ -16,7 +16,7 @@ from tqdm import tqdm
 
 # Constants
 TRIMET_DATA_URL = "http://www.psudataeng.com:8000/getStopEvents"
-DATASTORE_PATH = "/home/dtm-project/consumed_data/"
+DATASTORE_PATH = "/home/consumed_data/"
 TOPIC = "stop_data_readings"
 
 def parse_arguments():
