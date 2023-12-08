@@ -1,7 +1,10 @@
 Data_Eng_DTM
 
 Project Overview
-Data_Eng_DTM is a team project developed for CS 510 Data Engineering, consisting of team members Dan, Tim, Mahshid, and Max (DTM). This project implements a data pipeline to visualize Portland, Oregon bus (TriMet) data utilizing Google Cloud Project, Apache Kafka, PostgreSQL, Linux utilities, and Mapbox.
+Data_Eng_DTM is a team project developed for CS 510 Data Engineering, consisting of team members Dan, Tim, Mahshid, and Max (DTM).In this project, we delve into the complex task of constructing a data pipeline for TriMet's GPS breadcrumb data. Our goal is to not only gather and transport this data but also validate, store, and integrate it with additional sources for a comprehensive visualization of Portland, Oregon's public transportation system.
+
+Understanding TriMet
+TriMet operates a public transportation network in and around Portland, Oregon. Our focus is on TriMet's GPS breadcrumb data, which records the geographical positions of all buses in the system at 5-second intervals. This rich dataset provides a foundation for in-depth analysis of the city's bus operations.
 
 Key functionalities include:
 - Consuming API to fetch TriMet GPS breadcrumbs.
@@ -37,17 +40,17 @@ Execute the following scripts in order to set up and run the data pipeline:
 
 1. Gather and Produce Data:
    ```bash
-   python gather_produce.py
+   python gather_produce.py <path to getting_started.ini>
    ```
 
 2. Consume Data:**
    - For initial consumption:
      ```bash
-     python consumer.py
+     python consumer.py <path to getting_started.ini>
      ```
    - For updated consumption process:
      ```bash
-     python new_consumer.py
+     python new_consumer.py <path to getting_started.ini>
      ```
 
 3. Load Data to PostgreSQL:**
@@ -82,7 +85,14 @@ Run the following command to execute tests (if any):
 ```bash
 python -m unittest
 ```
+Additional Project Details
 
+Data Source: TriMet GPS breadcrumb and stop event data.
+GCP VMs: Utilized for various pipeline components.
+Kafka System: Confluent Kafka for data streaming.
+Producers and Consumers: Integrated within the Kafka system.
+Database Server: PostgreSQL for data storage.
+Special Considerations: Includes validations and transformations for breadcrumb and stop data to ensure data integrity and accuracy.
 Contributing
 Contributions to the Data_Eng_DTM project are welcome. Please follow the standard fork and pull request workflow.
 
